@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JC検定 3級 模擬試験</title>
+    <style>
+        :root {
+            --primary-color: #1a2a44; /* Deep Navy */
+            --accent-color: #c5a059; /* Gold */
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --white: #ffffff;
+            --correct-color: #2e7d32;
+            --wrong-color: #c62828;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--white);
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+        }
+
+        /* Content Area */
+        main {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Home Screen */
+        .home-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            text-align: center;
+        }
+
+        .logo-area {
+            margin-bottom: 2rem;
+        }
+        
+        .logo-icon {
+            font-size: 3rem;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .selector-area {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(26, 42, 68, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--white);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-exam {
+            background-color: #f0f4f8;
+            color: var(--primary-color);
+            border: 1px solid #dce4ec;
+            padding: 20px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-exam:hover {
+            background-color: #e2e8f0;
+        }
+
+        .btn-exam.selected {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            background-color: #ccc;
+            color: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+            border-color: #ccc;
+        }
+
+        /* Quiz Screen */
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background-color: #eee;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .question-image {
+            width: 100%;
+            height: auto;
+            max-height: 300px;
+            object-fit: contain;
+            margin: 0 0 20px 0;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            display: none; 
+            cursor: pointer;
+        }
+
+        .choices-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .choice-btn {
+            background-color: var(--white);
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            text-align: left;
+            font-size: 1rem;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .choice-btn.selected {
+            border-color: var(--primary-color);
+            background-color: #f0f4f8;
+            color: var(--primary-color);
+            font-weight: bold;
+            box-shadow: 0 0 0 1px var(--primary-color) inset;
+        }
+
+        .choice-btn.correct {
+            border-color: var(--correct-color);
+            background-color: #e8f5e9;
+            color: var(--correct-color);
+        }
+
+        .choice-btn.wrong {
+            border-color: var(--wrong-color);
+            background-color: #ffebee;
+            color: var(--wrong-color);
+        }
+
+        .choice-btn:disabled {
+            cursor: default;
+        }
+
+        .action-area {
+            margin-top: auto;
+            padding-top: 20px;
+            display: flex;
+            gap: 10px; /* space between buttons */
+        }
+
+        /* Feedback Area (Practice Mode) */
+        .feedback-area {
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+            border-left: 5px solid #ccc;
+        }
+
+        .feedback-area.correct {
+            border-left-color: var(--correct-color);
+            background-color: #e8f5e9;
+        }
+
+        .feedback-area.wrong {
+            border-left-color: var(--wrong-color);
+            background-color: #ffebee;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .explanation-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        /* Result Screen */
+        .result-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px 0;
+            background: linear-gradient(135deg, var(--primary-color), #2c3e50);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .result-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background-color: var(--white);
+            border: 1px solid #eee;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .result-item.correct-item { border-left: 4px solid var(--correct-color); }
+        .result-item.wrong-item { border-left: 4px solid var(--wrong-color); }
+
+        .result-icon {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            margin-right: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .correct-item .result-icon { background-color: #e8f5e9; color: var(--correct-color); }
+        .wrong-item .result-icon { background-color: #ffebee; color: var(--wrong-color); }
+
+        /* Animation for sliding */
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <h1>JC検定 3級対策</h1>
+    </header>
+
+    <main>
+        <div id="home-screen" class="screen active">
+            <div class="home-content">
+                <div class="logo-area">
+                    <div class="logo-icon">💎</div>
+                    <h2>Jewelry Coordinator<br>Level 3 Quiz</h2>
+                    <p style="color:#666; font-size:0.9rem;">過去問演習アプリ</p>
+                </div>
+                
+                <div id="step-exam" class="selector-area">
+                    <div class="section-title">受験する回を選んでください</div>
+                    <button class="btn btn-exam" onclick="selectExam('48')">
+                        <span>第48回検定 (2024.8)</span>
+                        <span>&gt;</span>
+                    </button>
+                    <button class="btn btn-exam" onclick="selectExam('47')">
+                        <span>第47回検定 (2024.3)</span>
+                        <span>&gt;</span>
+                    </button>
+                </div>
+
+                <div id="step-mode" class="selector-area" style="display:none;">
+                    <div class="section-title">モードを選んでください</div>
+                    <div style="margin-bottom:10px; font-weight:bold; color:var(--primary-color);">
+                        選択中: 第<span id="selected-exam-label"></span>回
+                    </div>
+                    <button class="btn btn-primary" onclick="startApp('practice')">
+                        練習モード
+                        <div style="font-size:0.8rem; font-weight:normal; opacity:0.8;">1問ごとに解説を確認</div>
+                    </button>
+                    <button class="btn btn-secondary" onclick="startApp('test')">
+                        模擬テスト
+                        <div style="font-size:0.8rem; font-weight:normal; opacity:0.8;">全問通して実力試し</div>
+                    </button>
+                    <button class="btn" style="background:none; color:#666; font-size:0.9rem;" onclick="resetSelection()">
+                        ← 選び直す
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="quiz-screen" class="screen">
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            
+            <div class="question-meta">
+                <span>Question <span id="q-current">1</span></span>
+                <span id="mode-badge" style="background:#eee; padding:2px 8px; border-radius:4px; font-size:0.75rem;">練習</span>
+            </div>
+
+            <h3 id="question-text" class="question-text">ここに質問が入ります</h3>
+            
+            <img id="question-image" class="question-image" src="" alt="問題画像">
+
+            <div id="choices-area" class="choices-container">
+                </div>
+
+            <div id="feedback-area" class="feedback-area">
+                <div id="feedback-title" class="feedback-title"></div>
+                <div id="explanation-text" class="explanation-text"></div>
+            </div>
+
+            <div class="action-area">
+                <button id="prev-btn" class="btn btn-secondary" style="width: auto; flex: 1; padding: 16px 10px;" onclick="prevQuestion()">＜ 戻る</button>
+                
+                <button id="submit-btn" class="btn btn-primary" style="flex: 2;" onclick="submitAnswer()">回答する</button>
+                <button id="next-btn" class="btn btn-primary" style="display:none; flex: 2;" onclick="nextQuestion()">次の問題へ</button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="screen">
+            <div class="result-header">
+                <div style="font-size:1rem; opacity:0.9;">第<span id="result-exam-label"></span>回 結果</div>
+                <div class="score-display"><span id="final-score">0</span> / <span id="total-count">0</span></div>
+                <div id="score-message" style="margin-top:10px; font-weight:bold;"></div>
+            </div>
+
+            <div style="margin-bottom:15px; font-weight:bold; color:#555;">回答一覧</div>
+            <ul id="result-list" class="result-list">
+                </ul>
+
+            <div class="action-area">
+                <button class="btn btn-primary" onclick="location.reload()">トップに戻る</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="quiz_data.js"></script>
+
+<script>
+    // --- Application State ---
+    let currentExamId = null;
+    let currentQuizList = [];
+    let currentMode = 'practice';
+    let currentIndex = 0;
+    let selectedChoice = null;
+    let userAnswers = {}; // Changed to object to allow index-based access
+    
+    // --- Elements ---
+    const stepExam = document.getElementById('step-exam');
+    const stepMode = document.getElementById('step-mode');
+    const selectedExamLabel = document.getElementById('selected-exam-label');
+    
+    const homeScreen = document.getElementById('home-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    
+    const progressBar = document.getElementById('progress-bar');
+    const qCurrent = document.getElementById('q-current');
+    const modeBadge = document.getElementById('mode-badge');
+    const questionText = document.getElementById('question-text');
+    const questionImage = document.getElementById('question-image');
+    const choicesArea = document.getElementById('choices-area');
+    const feedbackArea = document.getElementById('feedback-area');
+    const prevBtn = document.getElementById('prev-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    window.onload = function() {
+        if (typeof allQuizData === 'undefined') {
+            alert('データファイル(quiz_data.js)が見つかりません。');
+        }
+    };
+
+    // --- Home Logic ---
+    function selectExam(examId) {
+        if (!allQuizData[examId] || allQuizData[examId].length === 0) {
+            alert("この回のデータはまだ登録されていません。");
+            return;
+        }
+        currentExamId = examId;
+        currentQuizList = allQuizData[examId];
+        
+        // UI Transition
+        stepExam.style.display = 'none';
+        stepMode.style.display = 'flex';
+        stepMode.classList.add('fade-in');
+        selectedExamLabel.textContent = examId;
+    }
+
+    function resetSelection() {
+        currentExamId = null;
+        currentQuizList = [];
+        stepMode.style.display = 'none';
+        stepExam.style.display = 'flex';
+        stepExam.classList.add('fade-in');
+    }
+
+    // --- Quiz Logic ---
+    function startApp(mode) {
+        currentMode = mode;
+        currentIndex = 0;
+        userAnswers = {}; // Reset answers
+        
+        homeScreen.classList.remove('active');
+        resultScreen.classList.remove('active');
+        quizScreen.classList.add('active');
+        
+        modeBadge.textContent = (mode === 'practice') ? '練習' : '模擬テスト';
+        
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const q = currentQuizList[currentIndex];
+        const answeredData = userAnswers[currentIndex];
+        
+        // Progress
+        const progress = ((currentIndex) / currentQuizList.length) * 100;
+        progressBar.style.width = `${progress}%`;
+        qCurrent.textContent = currentIndex + 1;
+
+        // Reset UI Components
+        feedbackArea.style.display = 'none';
+        feedbackArea.className = 'feedback-area';
+        submitBtn.style.display = 'inline-block';
+        nextBtn.style.display = 'none';
+        
+        // Prev Button Visibility
+        if (currentIndex > 0) {
+            prevBtn.style.display = 'inline-block';
+            prevBtn.disabled = false;
+        } else {
+            prevBtn.style.display = 'none';
+        }
+
+        // --- State Restoration Logic ---
+        selectedChoice = null;
+        if (answeredData) {
+            selectedChoice = answeredData.selected;
+        }
+
+        // Configure Buttons based on Mode & State
+        if (currentMode === 'practice') {
+            submitBtn.textContent = '回答する';
+            if (answeredData) {
+                // Already answered in Practice mode -> Show Feedback, lock options
+                showFeedback(answeredData.correct, q, true); 
+            } else {
+                submitBtn.disabled = true;
+            }
+        } else {
+            // Test Mode
+            if (currentIndex === currentQuizList.length - 1) {
+                submitBtn.textContent = 'テストを終了する';
+            } else {
+                submitBtn.textContent = '次の問題へ';
+            }
+            // Allow changing answer in Test Mode, so just restore selection
+            submitBtn.disabled = (selectedChoice === null);
+        }
+        
+        // Render Text
+        questionText.innerHTML = q.question.replace(/\n/g, '<br>');
+        
+        // Render Image
+        if (q.images) {
+            questionImage.src = q.images;
+            questionImage.style.display = 'block';
+            questionImage.onclick = function() {
+                window.open(q.images, '_blank');
+            };
+            questionImage.title = "タップして拡大";
+        } else {
+            questionImage.style.display = 'none';
+            questionImage.onclick = null;
+        }
+
+        // Render Choices
+        choicesArea.innerHTML = '';
+        q.choices.forEach((choice, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerHTML = choice;
+            
+            // Restore selection style
+            if (selectedChoice === index) {
+                btn.classList.add('selected');
+            }
+
+            // Lock if already answered in Practice mode
+            if (currentMode === 'practice' && answeredData) {
+                btn.disabled = true;
+                // Add correct/wrong styling if we are showing feedback
+                if (index === answeredData.correctIndex) btn.classList.add('correct');
+                if (!answeredData.correct && index === answeredData.selected) btn.classList.add('wrong');
+            } else {
+                // Interactive
+                btn.onclick = () => selectChoice(index);
+            }
+            
+            choicesArea.appendChild(btn);
+        });
+
+        window.scrollTo(0, 0);
+    }
+
+    function selectChoice(index) {
+        selectedChoice = index;
+        
+        const buttons = choicesArea.querySelectorAll('.choice-btn');
+        buttons.forEach((btn, i) => {
+            if (i === index) btn.classList.add('selected');
+            else btn.classList.remove('selected');
+        });
+
+        submitBtn.disabled = false;
+    }
+
+    function submitAnswer() {
+        if (selectedChoice === null) return;
+
+        const q = currentQuizList[currentIndex];
+        
+        // Convert answer char (a,b,c...) to index (0,1,2...)
+        // Assume format is single char or text. If text, we might need map. 
+        // Using char code based on the data structure provided.
+        const charCode = q.answer.toLowerCase().charCodeAt(0);
+        const correctIndex = charCode - 97;
+
+        const isCorrect = (selectedChoice === correctIndex);
+
+        // Save Answer
+        userAnswers[currentIndex] = {
+            qIndex: currentIndex,
+            selected: selectedChoice,
+            correct: isCorrect,
+            correctIndex: correctIndex
+        };
+
+        if (currentMode === 'practice') {
+            showFeedback(isCorrect, q, false);
+        } else {
+            nextQuestion();
+        }
+    }
+
+    function prevQuestion() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            renderQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        
+        if (currentIndex < currentQuizList.length) {
+            renderQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showFeedback(isCorrect, qData, isRestoring) {
+        const buttons = choicesArea.querySelectorAll('.choice-btn');
+        
+        // Apply visual feedback styles
+        const answeredData = userAnswers[currentIndex];
+        const corrIdx = answeredData ? answeredData.correctIndex : -1;
+        const selIdx = answeredData ? answeredData.selected : -1;
+
+        if (buttons[corrIdx]) buttons[corrIdx].classList.add('correct');
+        if (!isCorrect && buttons[selIdx]) buttons[selIdx].classList.add('wrong');
+
+        // Disable all buttons in practice mode after answering
+        buttons.forEach(btn => btn.disabled = true);
+
+        // Show Explanation Area
+        feedbackArea.style.display = 'block';
+        if (isCorrect) {
+            feedbackArea.classList.add('correct');
+            feedbackArea.classList.remove('wrong');
+            document.getElementById('feedback-title').innerHTML = '<span style="color:var(--correct-color); font-size:1.5rem;">✔</span> 正解！';
+        } else {
+            feedbackArea.classList.add('wrong');
+            feedbackArea.classList.remove('correct');
+            document.getElementById('feedback-title').innerHTML = '<span style="color:var(--wrong-color); font-size:1.5rem;">✘</span> 不正解...';
+        }
+        
+        document.getElementById('explanation-text').innerHTML = qData.explanation || "解説はありません。";
+
+        // Swap buttons
+        submitBtn.style.display = 'none';
+        nextBtn.style.display = 'inline-block';
+        
+        // Scroll to feedback only if it's a fresh answer (not restoring history)
+        if (!isRestoring) {
+            feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function showResults() {
+        quizScreen.classList.remove('active');
+        resultScreen.classList.add('active');
+
+        // Calculate Score
+        // Convert userAnswers object to array for counting
+        const answersArray = Object.values(userAnswers);
+        const score = answersArray.filter(a => a.correct).length;
+        
+        document.getElementById('final-score').textContent = score;
+        document.getElementById('total-count').textContent = currentQuizList.length;
+        document.getElementById('result-exam-label').textContent = currentExamId;
+
+        const percentage = (score / currentQuizList.length) * 100;
+        let msg = "";
+        if (percentage === 100) msg = "完璧です！素晴らしい知識です。";
+        else if (percentage >= 80) msg = "合格圏内です！その調子です。";
+        else if (percentage >= 60) msg = "あと一歩！復習して苦手をなくしましょう。";
+        else msg = "まずは基礎からしっかり復習しましょう。";
+        
+        document.getElementById('score-message').textContent = msg;
+
+        const list = document.getElementById('result-list');
+        list.innerHTML = '';
+
+        // Iterate through all questions to show results (handle unanswered if any)
+        currentQuizList.forEach((q, idx) => {
+            const ans = userAnswers[idx];
+            const li = document.createElement('li');
+            
+            let isCorrect = false;
+            let icon = '-';
+            let itemClass = '';
+
+            if (ans) {
+                isCorrect = ans.correct;
+                icon = isCorrect ? '✔' : '✘';
+                itemClass = isCorrect ? 'correct-item' : 'wrong-item';
+            } else {
+                // Unanswered case (shouldn't happen in normal flow but good for safety)
+                icon = '?';
+            }
+
+            li.className = `result-item ${itemClass}`;
+            
+            const qShort = q.question.split('\n').pop().substring(0, 40) + '...';
+            
+            li.innerHTML = `
+                <div class="result-icon">${icon}</div>
+                <div style="flex:1;">
+                    <div style="font-weight:bold; font-size:0.85rem; color:#666;">問${q.question_no}</div>
+                    <div style="margin-top:2px;">${qShort}</div>
+                    ${!isCorrect ? `<div style="font-size:0.8rem; color:#d32f2f; margin-top:4px;">正解: (${q.answer})</div>` : ''}
+                </div>
+            `;
+            list.appendChild(li);
+        });
+        
+        window.scrollTo(0,0);
+    }
+</script>
+
+</body>
+</html>
